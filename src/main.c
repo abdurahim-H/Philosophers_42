@@ -1,72 +1,92 @@
 #include "philo.h"
 
-int	validate_params(t_params *params)
+int	create_philo_thread(pthread_t *thread, t_philo_data *data,
+	void *(*philo_lifecycle)(void *))
 {
-	if (params->num_philosophers <= 0 || params->time_to_die <= 0
-		|| params->time_to_eat <= 0 || params->time_to_sleep <= 0
-		|| (params->num_times_to_eat <= 0 && params->num_times_to_eat != -1))
+	if (pthread_create(thread, NULL, philo_lifecycle, data) != 0)
 	{
-		printf("Error: Invalid argument values\n");
-		return (-1);
+		free(data);
+		return (1);
 	}
-	if (params->num_philosophers > INT_MAX
-		|| params->num_philosophers < INT_MIN)
-		return (-1);
-	if (params->time_to_die > INT_MAX || params->time_to_die < INT_MIN)
-		return (-1);
-	if (params->time_to_eat > INT_MAX || params-> time_to_eat < INT_MIN)
-		return (-1);
-	if (params->time_to_sleep > INT_MAX || params->time_to_sleep < INT_MIN)
-		return (-1);
-	if (params->num_times_to_eat > INT_MAX
-		|| params->num_times_to_eat < INT_MIN)
-		return (-1);
 	return (0);
 }
 
-int	parse_arguments(int argc, char *argv[], t_params *params)
+int	create_philosophers(pthread_t *threads, int num_philosophers,
+	void *(*philo_lifecycle)(void *), t_philo_data **philo_data)
 {
-	if (argc != 5 &*& argc != 6)
-	{
-		printf("Usage: %s number_of_philosophers time_to_die "
-			"time_to_eat time_to_sleep [n_times_each_philosopher_must_eat]\n",
-			argv[0]);
-		return (-1);
-	}
-	params->num_philosophers = my_atoi(argv[1]);
-	params->time_to_die = my_atoi(argv[2]);
-	params->time_to_eat = my_atoi(argv[3]);
-	params->time_to_sleep = my_atoi(argv[4]);
-	if (argc == 6)
-		params->num_times_to_eat = my_atoi(argv[5]);
-	else
-		params->num_times_to_eat = -1;
-	return (validate_params(params));
-}
-
-int main(int argc, char *argv[])
-{
-	t_params	params;
-	pthread_t	*threads;
-	int			i;
-	int			*id;
+	int	i;
 
 	i = 0;
-	if (parse_arguments(argc, *argv, &params) != 0)
-		return (1);
-	threads = malloc(sizeof(pthread_t) * params.num_philosophers);
-	if (!threads)
+	while (i < num_philosophers)
 	{
-		printf("Error: Unable to allocate memory for threads\n");
-		return (1);
-	}
-	while(i < params.num_philosophers)
-	{
-		id = malloc(sizeof(int));
-		if (pthread_create(&threads[i], NULL, philo_lifecycle, id) != 0)
-			return (1);
+		if (create_philo_thread(&threads[i], philo_data[i],
+				philo_lifecycle) != 0)
+		{
+			printf("Error: Unable to create thread\n");
+			cleanup_exit(threads, philo_data, i);
+		}
 		i++;
 	}
+	return (0);
+}
+
+void	cleanup_exit(pthread_t *threads, t_philo_data **philo_data,
+		int num_created)
+{
+	int	i;
+
+	i = 0;
+	while (i < num_created)
+	{
+		pthread_cancel(threads[i]);
+		pthread_join(threads[i], NULL);
+		free(philo_data[i]);
+		i++;
+	}
+	free(philo_data);
 	free(threads);
+	exit(1);
+}
+
+void	join_and_free_threads(pthread_t *threads, t_philo_data **philo_data,
+		int num_philosophers)
+{
+	int	i;
+
+	i = -1;
+	while (++i < num_philosophers)
+	{
+		pthread_join(threads[i], NULL);
+		free(philo_data[i]);
+	}
+	free(threads);
+	free(philo_data);
+}
+
+int	main(int argc, char **argv)
+{
+	t_params		params;
+	pthread_t		*threads;
+	t_philo_data	**philo_data;
+
+	if (parse_arguments(argc, argv, &params) != 0)
+		return (1);
+	if (allocate_threads(&threads, params.num_philosophers) != 0)
+		return (1);
+	philo_data = allocate_philo_data(params.num_philosophers, &params);
+	if (!philo_data)
+	{
+		free(threads);
+		return (1);
+	}
+	if (create_philosophers(threads, params.num_philosophers,
+			philo_lifecycle, philo_data) != 0)
+	{
+		free(threads);
+		free(philo_data);
+		return (1);
+	}
+	initialize_mutexes(threads);
+	join_and_free_threads(threads, philo_data, params.num_philosophers);
 	return (0);
 }

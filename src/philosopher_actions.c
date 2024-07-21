@@ -17,14 +17,18 @@ void	sleep(int philosopher_id)
 
 void	*philo_lifecycle(void *arg)
 {
-	int	philosopher_id;
+	t_philo_data	*data;
+	t_params		*params;
+	int				id;
 
-	philosopher_id = *(int *)arg;
+	data = (t_philo_data *)arg;
+	id = data->id;
+	params = data->params;
 	while (1)
 	{
-		think(philosopher_id);
-		eat(philosopher_id);
-		sleep(philosopher_id);
+		think(id);
+		eat(id);
+		sleep(id);
 	}
 	return (NULL);
 }
