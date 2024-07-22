@@ -6,7 +6,7 @@ int	validate_params(t_params *params)
 		|| params->time_to_eat <= 0 || params->time_to_sleep <= 0
 		|| (params->num_times_to_eat <= 0 && params->num_times_to_eat != -1))
 	{
-		printf("Error: Invalid argument values\n");
+		printf("ERROR: INVALID ARGUMENT VALUES\n");
 		return (-1);
 	}
 	if (params->num_philosophers > INT_MAX
@@ -49,7 +49,7 @@ int	allocate_threads(pthread_t **threads, int num_philosophers)
 	*threads = (pthread_t *)malloc(sizeof(pthread_t) * num_philosophers);
 	if (!*threads)
 	{
-		printf("Error: Unable to allocate memory for threads\n");
+		printf("ERROR: UNABLE TO ALLOCATE MEMORY FOR THREADS\n");
 		return (1);
 	}
 	return (0);

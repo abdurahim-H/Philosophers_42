@@ -69,24 +69,18 @@ int	main(int argc, char **argv)
 	pthread_t		*threads;
 	t_philo_data	**philo_data;
 
+	srand(time(NULL));
 	if (parse_arguments(argc, argv, &params) != 0)
 		return (1);
-	if (allocate_threads(&threads, params.num_philosophers) != 0)
+	if (initialize_simulation(&params, &threads, &philo_data) != 0)
 		return (1);
-	philo_data = allocate_philo_data(params.num_philosophers, &params);
-	if (!philo_data)
-	{
-		free(threads);
-		return (1);
-	}
 	if (create_philosophers(threads, params.num_philosophers,
 			philo_lifecycle, philo_data) != 0)
 	{
-		free(threads);
-		free(philo_data);
+		cleanup_simulation(&params, threads, philo_data);
 		return (1);
 	}
-	initialize_mutexes(threads);
 	join_and_free_threads(threads, philo_data, params.num_philosophers);
+	cleanup_mutexes(&params);
 	return (0);
 }
