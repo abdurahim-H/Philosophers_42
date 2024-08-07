@@ -40,6 +40,7 @@ void	cleanup_exit(pthread_t *threads, t_philo_data **philo_data,
 	{
 		pthread_cancel(threads[i]);
 		pthread_join(threads[i], NULL);
+		pthread_mutex_destroy(&(philo_data[i]->data_mutex));
 		free(philo_data[i]);
 		i++;
 	}
@@ -65,22 +66,19 @@ void	join_and_free_threads(pthread_t *threads, t_philo_data **philo_data,
 
 int	main(int argc, char **argv)
 {
-	t_params		params;
-	pthread_t		*threads;
-	t_philo_data	**philo_data;
+	t_sim_data			sim_data;
+	t_params			params;
 
 	srand(time(NULL));
-	if (parse_arguments(argc, argv, &params) != 0)
+	sim_data.params = &params;
+	if (initialize_all(argc, argv, &sim_data) != 0)
 		return (1);
-	if (initialize_simulation(&params, &threads, &philo_data) != 0)
-		return (1);
-	if (create_philosophers(threads, params.num_philosophers,
-			philo_lifecycle, philo_data) != 0)
+	if (create_all_threads(&sim_data) != 0)
 	{
-		cleanup_simulation(&params, threads, philo_data);
+		cleanup_simulation(sim_data.params, sim_data.threads,
+			sim_data.philo_data);
 		return (1);
 	}
-	join_and_free_threads(threads, philo_data, params.num_philosophers);
-	cleanup_mutexes(&params);
+	join_and_cleanup(&sim_data);
 	return (0);
 }

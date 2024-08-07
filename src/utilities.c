@@ -6,7 +6,7 @@
 /*   By: abhudulo <abhudulo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/09 03:45:36 by abhudulo          #+#    #+#             */
-/*   Updated: 2024/07/09 03:45:45 by abhudulo         ###   ########.fr       */
+/*   Updated: 2024/08/03 09:03:02 by abhudulo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,4 +60,9 @@ int	my_atoi(const char *str)
 		i++;
 	}
 	return (convert_str_to_int(&str[i], &sign));
+}
+
+void	log_error(const char *message)
+{
+	fprintf(stderr, "Error: %s\n", message);
 }
