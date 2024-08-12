@@ -85,42 +85,96 @@ int	handle_simulation_end_condition(t_monitor_data *data)
 	return (0);
 }
 
-int	check_philosopher_status(t_monitor_data *data, int *philosophers_done)
+// int	check_philosopher_status(t_monitor_data *data, int *philosophers_done)
+// {
+// 	if (!check_all_philosophers_alive(data))
+// 		return (0);
+// 	if (count_philosophers_done_eating_loop(data, philosophers_done)
+// 		== data->params->num_philosophers)
+// 	{
+// 		if (handle_simulation_end_condition(data) != 0)
+// 			return (0);
+// 		return (0);
+// 	}
+// 	return (1);
+// }
+
+int check_philosopher_status(t_monitor_data *data, int *philosophers_done)
 {
-	if (!check_all_philosophers_alive(data))
-		return (0);
-	if (count_philosophers_done_eating_loop(data, philosophers_done)
-		== data->params->num_philosophers)
-	{
-		if (handle_simulation_end_condition(data) != 0)
-			return (0);
-		return (0);
-	}
-	return (1);
+    int i;
+    int meals_eaten;
+
+    *philosophers_done = 0;
+    i = 0;
+    while (i < data->params->num_philosophers)
+    {
+        if (!is_philosopher_alive(data->philo_data[i]))
+            return (0);
+        safe_mutex_operation(&data->philo_data[i]->data_mutex, 1);
+        meals_eaten = data->philo_data[i]->philosopher.meals_eaten;
+        safe_mutex_operation(&data->philo_data[i]->data_mutex, 0);
+        if (data->params->num_times_to_eat != -1 && meals_eaten >= data->params->num_times_to_eat)
+            (*philosophers_done)++;
+        i++;
+    }
+    if (*philosophers_done == data->params->num_philosophers)
+        return (0);
+    return (1);
 }
 
-void	*monitor_philosophers(void *arg)
-{
-	t_monitor_data		*data;
-	int					philosophers_done;
-	long long			sleep_time;
-	int					lock;
+// void	*monitor_philosophers(void *arg)
+// {
+// 	t_monitor_data		*data;
+// 	int					philosophers_done;
+// 	long long			sleep_time;
+// 	int					lock;
 
-	data = (t_monitor_data *)arg;
-	sleep_time = data->params->time_to_die / 2;
-	while (1)
-	{
-		if (!check_philosopher_status(data, &philosophers_done))
-		{
-			lock = 1;
-			if (safe_mutex_operation(&data->params->end_mutex, lock) == 0)
-			{
-				data->params->simulation_end = 1;
-				safe_mutex_operation(&data->params->end_mutex, !lock);
-			}
-			break ;
-		}
-		usleep(sleep_time * 1000);
-	}
-	return (NULL);
+// 	data = (t_monitor_data *)arg;
+// 	if (data->params->time_to_die / 10 > 1)
+// 		sleep_time = data->params->time_to_die / 10;
+// 	else
+// 		sleep_time = 1;
+// 	while (1)
+// 	{
+// 		if (!check_philosopher_status(data, &philosophers_done))
+// 		{
+// 			lock = 1;
+// 			if (safe_mutex_operation(&data->params->end_mutex, lock) == 0)
+// 			{
+// 				data->params->simulation_end = 1;
+// 				safe_mutex_operation(&data->params->end_mutex, !lock);
+// 			}
+// 			break ;
+// 		}
+// 		usleep(sleep_time * 1000);
+// 	}
+// 	return (NULL);
+// }
+
+void    *monitor_philosophers(void *arg)
+{
+    t_monitor_data      *data;
+    int                 philosophers_done;
+    long long           sleep_time;
+
+    data = (t_monitor_data *)arg;
+    sleep_time = (data->params->time_to_die / 10 > 1) ? data->params->time_to_die / 10 : 1;
+    while (1)
+    {
+        if (!check_philosopher_status(data, &philosophers_done))
+        {
+            pthread_mutex_lock(&data->params->end_mutex);
+            if (!data->params->simulation_end)
+            {
+                data->params->simulation_end = 1;
+                if (philosophers_done == data->params->num_philosophers)
+                    printf("All philosophers have eaten enough times\n");
+                printf("Simulation ended\n");
+            }
+            pthread_mutex_unlock(&data->params->end_mutex);
+            break ;
+        }
+        usleep(sleep_time * 1000);
+    }
+    return (NULL);
 }

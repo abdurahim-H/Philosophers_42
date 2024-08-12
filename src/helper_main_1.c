@@ -34,10 +34,14 @@ int	create_all_threads(t_sim_data *sim_data)
 	return (0);
 }
 
-void	join_and_cleanup(t_sim_data *sim_data)
+void    join_and_cleanup(t_sim_data *sim_data)
 {
-	pthread_join(sim_data->monitor_thread, NULL);
-	join_and_free_threads(sim_data->threads, sim_data->philo_data,
-		sim_data->params->num_philosophers);
-	cleanup_mutexes(sim_data->params);
+    int i;
+
+    pthread_join(sim_data->monitor_thread, NULL);
+    for (i = 0; i < sim_data->params->num_philosophers; i++)
+    {
+        pthread_join(sim_data->threads[i], NULL);
+    }
+    cleanup_simulation(sim_data->params, sim_data->threads, sim_data->philo_data);
 }
