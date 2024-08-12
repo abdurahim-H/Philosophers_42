@@ -39,17 +39,14 @@ void	cleanup_simulation(t_params *params, pthread_t *threads,
 	cleanup_mutexes(params);
 }
 
-void	cleanup_mutexes(t_params *params)
+void cleanup_mutexes(t_params *params)
 {
-	int	i;
+    int i;
 
-	i = 0;
-	while (i < params->num_philosophers)
-	{
-		pthread_mutex_destroy(&(params->forks[i]));
-		i++;
-	}
-	free(params->forks);
+    for (i = 0; i < params->num_philosophers; i++)
+        pthread_mutex_destroy(&params->forks[i]);
+    pthread_mutex_destroy(&params->end_mutex);
+    free(params->forks);
 }
 
 void	cleanup_philosopher_mutexes(t_philo_data **philo_data,
