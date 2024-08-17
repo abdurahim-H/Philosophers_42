@@ -99,33 +99,6 @@ int	check_philosopher_status(t_monitor_data *data, int *philosophers_done)
 	return (1);
 }
 
-// void	*monitor_philosophers(void *arg)
-// {
-// 	t_monitor_data		*data;
-// 	int					philosophers_done;
-// 	long long			sleep_time;
-// 	int					lock;
-
-// 	data = (t_monitor_data *)arg;
-// 	sleep_time = data->params->time_to_die / 2;
-// 	while (1)
-// 	{
-// 		if (!check_philosopher_status(data, &philosophers_done))
-// 		{
-// 			lock = 1;
-// 			if (safe_mutex_operation(&data->params->end_mutex, lock) == 0)
-// 			{
-// 				data->params->simulation_end = 1;
-// 				safe_mutex_operation(&data->params->end_mutex, !lock);
-// 			}
-// 			break ;
-// 		}
-// 		usleep(sleep_time * 1000);
-// 	}
-// 	return (NULL);
-// }
-
-
 int     check_philosophers(t_monitor_data *data, int i)
 {
     if (i >= data->params->num_philosophers)
@@ -151,7 +124,7 @@ void    *monitor_philosophers(void *arg)
             handle_simulation_end_condition(data);
             return (NULL);
         }
-        usleep(1000);
+        usleep(100);
     }
     return (NULL);
 }

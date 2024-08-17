@@ -23,47 +23,17 @@ long long	get_current_time(void)
 	return ((tv.tv_sec * 1000LL) + (tv.tv_usec / 1000));
 }
 
-// void	philosopher_actions(t_philo_data *data, int left_fork, int right_fork)
-// {
-// 	long long	time_to_death;
-// 	t_state		current_state;
-// 	long long	last_meal_time;
-
-// 	safe_mutex_operation(&data->data_mutex, 1);
-// 	current_state = data->philosopher.state;
-// 	last_meal_time = data->philosopher.last_meal_time;
-// 	safe_mutex_operation(&data->data_mutex, 0);
-// 	time_to_death = data->params->time_to_die - (get_current_time()
-// 			- last_meal_time);
-// 	if (current_state != EATING && time_to_death
-// 		< data->params->time_to_eat)
-// 	{
-// 		eat(data, left_fork, right_fork);
-// 	}
-// 	else
-// 	{
-// 		think(data->id);
-// 		eat(data, left_fork, right_fork);
-// 		ft_sleep(data->id, data->params);
-// 	}
-// }
-
-
 void    philosopher_actions(t_philo_data *data, int left_fork, int right_fork)
 {
-    int current_state;
-
     safe_mutex_operation(&data->data_mutex, 1);
-    current_state = data->philosopher.state;
+    data->philosopher.state = THINKING;
     safe_mutex_operation(&data->data_mutex, 0);
-    if (current_state != EATING)
-    {
-        think(data->id);
-        eat(data, left_fork, right_fork);
-        ft_sleep(data->id, data->params);
-    }
-    else
-    {
-        eat(data, left_fork, right_fork);
-    }
+    think(data->id);
+    
+    eat(data, left_fork, right_fork);
+    
+    safe_mutex_operation(&data->data_mutex, 1);
+    data->philosopher.state = SLEPING;
+    safe_mutex_operation(&data->data_mutex, 0);
+    ft_sleep(data->id, data->params);
 }
