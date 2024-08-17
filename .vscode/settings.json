@@ -3,6 +3,7 @@
 		"*.ejs": "html",
 		"pthread.h": "c",
 		"__locale": "c",
-		"locale": "c"
+		"locale": "c",
+		"philo.h": "c"
 	}
 }
