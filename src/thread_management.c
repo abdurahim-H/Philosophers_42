@@ -1,14 +1,26 @@
 #include "philo.h"
 
-int	check_philosopher_death(t_monitor_data *data, int i)
+// int	check_philosopher_death(t_monitor_data *data, int i)
+// {
+// 	if (!is_philosopher_alive(data->philo_data[i]))
+// 	{
+// 		printf("Philosopher %d has died\n", data->philo_data[i]->id);
+// 		handle_simulation_end_condition(data);
+// 		return (1);
+// 	}
+// 	return (0);
+// }
+
+int    check_philosopher_death(t_monitor_data *data, int i)
 {
-	if (!is_philosopher_alive(data->philo_data[i]))
-	{
-		printf("Philosopher %d has died\n", data->philo_data[i]->id);
-		handle_simulation_end_condition(data);
-		return (1);
-	}
-	return (0);
+    if (!is_philosopher_alive(data->philo_data[i]))
+    {
+        long long current_time = get_current_time();
+        printf("%lld %d died\n", current_time, data->philo_data[i]->id);
+        handle_simulation_end_condition(data);
+        return (1);
+    }
+    return (0);
 }
 
 int	safe_mutex_operation(pthread_mutex_t *mutex, int lock)

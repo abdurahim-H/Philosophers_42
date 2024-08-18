@@ -6,7 +6,7 @@
 /*   By: abhudulo <abhudulo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/08 21:16:18 by abhudulo          #+#    #+#             */
-/*   Updated: 2024/08/12 17:50:06 by abhudulo         ###   ########.fr       */
+/*   Updated: 2024/08/18 02:39:28 by abhudulo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,9 +74,11 @@ typedef struct s_sim_data
 
 int				my_atoi(const char *str);
 void			log_error(const char *message);
-void			ft_sleep(int philosopher_id, t_params *params);
+// void			ft_sleep(int philosopher_id, t_params *params);
+void			ft_sleep(t_philo_data *philo);
 void			eat(t_philo_data *philo, int left_fork, int right_fork);
-void			think(int philosopher_id);
+// void			think(int philosopher_id);
+void			think(t_philo_data *philo);
 void			*philo_lifecycle(void *arg);
 int				validate_params(t_params *params);
 int				parse_arguments(int argc, char *argv[], t_params *params);

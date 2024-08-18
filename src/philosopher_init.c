@@ -28,12 +28,12 @@ void    philosopher_actions(t_philo_data *data, int left_fork, int right_fork)
     safe_mutex_operation(&data->data_mutex, 1);
     data->philosopher.state = THINKING;
     safe_mutex_operation(&data->data_mutex, 0);
-    think(data->id);
+    think(data);
     
     eat(data, left_fork, right_fork);
     
     safe_mutex_operation(&data->data_mutex, 1);
     data->philosopher.state = SLEPING;
     safe_mutex_operation(&data->data_mutex, 0);
-    ft_sleep(data->id, data->params);
+    ft_sleep(data);
 }
