@@ -34,27 +34,3 @@ int	allocate_threads(pthread_t **threads, int num_philosophers)
 	}
 	return (0);
 }
-
-// t_philo_data	**allocate_philo_data(int num_philosophers, t_params *params)
-// {
-// 	t_philo_data	**philo_data;
-// 	int				i;
-
-// 	philo_data = (t_philo_data **)malloc(sizeof(t_philo_data *)
-// 			* num_philosophers);
-// 	if (!philo_data)
-// 		return (NULL);
-// 	i = -1;
-// 	while (++i < num_philosophers)
-// 	{
-// 		philo_data[i] = (t_philo_data *)malloc(sizeof(t_philo_data));
-// 		if (!philo_data[i])
-// 		{
-// 			cleanup_threads(NULL, (int **)philo_data, i);
-// 			return (NULL);
-// 		}
-// 		philo_data[i]->id = i + 1;
-// 		philo_data[i]->params = params;
-// 	}
-// 	return (philo_data);
-// }
