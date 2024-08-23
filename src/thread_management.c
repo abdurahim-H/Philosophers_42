@@ -11,13 +11,15 @@
 // 	return (0);
 // }
 
-int    check_philosopher_death(t_monitor_data *data, int i)
+int check_philosopher_death(t_monitor_data *data, int i)
 {
     if (!is_philosopher_alive(data->philo_data[i]))
     {
         long long current_time = get_current_time();
         printf("%lld %d died\n", current_time, data->philo_data[i]->id);
+        printf("DEBUG: Death detected for philosopher %d\n", data->philo_data[i]->id);
         handle_simulation_end_condition(data);
+        printf("DEBUG: Simulation end condition handled\n");
         return (1);
     }
     return (0);
@@ -77,24 +79,42 @@ int	count_philosophers_done_eating_loop(t_monitor_data *data,
 	return (*philosophers_done);
 }
 
-int	handle_simulation_end_condition(t_monitor_data *data)
-{
-	int	lock;
-	int	result;
+// int	handle_simulation_end_condition(t_monitor_data *data)
+// {
+// 	int	lock;
+// 	int	result;
 
-	lock = 1;
-	result = safe_mutex_operation(&data->params->end_mutex, lock);
-	if (result == 0)
-	{
-		data->params->simulation_end = 1;
-		result = safe_mutex_operation(&data->params->end_mutex, !lock);
-	}
-	if (result != 0)
-	{
-		printf("Error: Failed to handle simulation end condition\n");
-		return (1);
-	}
-	return (0);
+// 	lock = 1;
+// 	result = safe_mutex_operation(&data->params->end_mutex, lock);
+// 	if (result == 0)
+// 	{
+// 		data->params->simulation_end = 1;
+// 		result = safe_mutex_operation(&data->params->end_mutex, !lock);
+// 	}
+// 	if (result != 0)
+// 	{
+// 		printf("Error: Failed to handle simulation end condition\n");
+// 		return (1);
+// 	}
+// 	return (0);
+// }
+
+int handle_simulation_end_condition(t_monitor_data *data)
+{
+    int result;
+
+    result = safe_mutex_operation(&data->params->end_mutex, 1);
+    if (result == 0)
+    {
+        data->params->simulation_end = 1;
+        result = safe_mutex_operation(&data->params->end_mutex, 0);
+    }
+    if (result != 0)
+    {
+        printf("Error: Failed to handle simulation end condition\n");
+        return (1);
+    }
+    return (0);
 }
 
 int	check_philosopher_status(t_monitor_data *data, int *philosophers_done)
@@ -120,23 +140,59 @@ int     check_philosophers(t_monitor_data *data, int i)
     return (check_philosophers(data, i + 1));
 }
 
-void    *monitor_philosophers(void *arg)
+// void    *monitor_philosophers(void *arg)
+// {
+//     t_monitor_data      *data;
+//     int                 philosophers_done;
+
+//     data = (t_monitor_data *)arg;
+//     while (1)
+//     {
+//         if (check_philosophers(data, 0))
+//             return (NULL);
+//         if (count_philosophers_done_eating_loop(data, &philosophers_done) 
+//             == data->params->num_philosophers)
+//         {
+//             handle_simulation_end_condition(data);
+//             return (NULL);
+//         }
+//         usleep(100);
+//     }
+//     return (NULL);
+// }
+
+void *monitor_philosophers(void *arg)
 {
-    t_monitor_data      *data;
-    int                 philosophers_done;
+    t_monitor_data *data;
+    int philosophers_done;
+    int i;
+    long long death_time;
+    int dead_philosopher_id;
 
     data = (t_monitor_data *)arg;
     while (1)
     {
-        if (check_philosophers(data, 0))
-            return (NULL);
+        for (i = 0; i < data->params->num_philosophers; i++)
+        {
+            if (!is_philosopher_alive(data->philo_data[i]))
+            {
+                death_time = get_current_time();
+                dead_philosopher_id = data->philo_data[i]->id;
+                handle_simulation_end_condition(data);
+                usleep(1000); // Small delay to ensure other threads detect simulation end
+                printf("%lld %d died\n", death_time, dead_philosopher_id);
+                return NULL;
+            }
+        }
+        
         if (count_philosophers_done_eating_loop(data, &philosophers_done) 
             == data->params->num_philosophers)
         {
             handle_simulation_end_condition(data);
-            return (NULL);
+            return NULL;
         }
+        
         usleep(100);
     }
-    return (NULL);
+    return NULL;
 }
