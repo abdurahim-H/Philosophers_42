@@ -6,7 +6,7 @@
 /*   By: abhudulo <abhudulo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/08 21:16:18 by abhudulo          #+#    #+#             */
-/*   Updated: 2024/08/18 02:39:28 by abhudulo         ###   ########.fr       */
+/*   Updated: 2024/09/03 15:49:29 by abhudulo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ typedef struct s_params
 	pthread_mutex_t	*forks;
 	int				simulation_end;
 	pthread_mutex_t	end_mutex;
+	pthread_mutex_t	print_mutex;
 }	t_params;
 
 typedef enum e_state
@@ -74,10 +75,8 @@ typedef struct s_sim_data
 
 int				my_atoi(const char *str);
 void			log_error(const char *message);
-// void			ft_sleep(int philosopher_id, t_params *params);
 void			ft_sleep(t_philo_data *philo);
-void			eat(t_philo_data *philo, int left_fork, int right_fork);
-// void			think(int philosopher_id);
+void			eat(t_philo_data *philo);
 void			think(t_philo_data *philo);
 void			*philo_lifecycle(void *arg);
 int				validate_params(t_params *params);
@@ -117,4 +116,28 @@ int				safe_mutex_operation(pthread_mutex_t *mutex, int lock);
 int				handle_simulation_end_condition(t_monitor_data *data);
 void			cleanup_philosopher_mutexes(t_philo_data **philo_data,
 					int num_philosophers);
+int				check_simulation_end(t_params *params);
+int				take_forks(t_philo_data *data, int left_fork, int right_fork);
+void			release_forks(t_philo_data *data, int left_fork, int right_fork);
+int				handle_single_philosopher(t_philo_data *data, int fork);
+int				take_first_fork(t_philo_data *data, int fork);
+int				take_second_fork(t_philo_data *data, int first, int second);
+int				init_end_mutex(t_params *params);
+int				init_forks_and_threads(t_params *params, pthread_t **threads);
+int				init_philo_data(t_params *params, pthread_t **threads,
+					t_philo_data ***philo_data);
+// int				check_philosophers(t_monitor_data *data, int i);
+int 			check_philosophers(t_monitor_data *data);
+int				check_all_philosophers_finished(t_monitor_data *data);
+int				check_philosopher_death(t_monitor_data *data, int i);
+int				count_philosophers_done_eating_loop(t_monitor_data *data,
+					int *philosophers_done);
+int				convert_str_to_int(const char *str, int *sign);
+int				handle_overflow(int result, char current_char, int sign);
+int				check_all_philosophers_alive(t_monitor_data *data);
+int				check_execution_limit(void);
+void			safe_mutex_destroy(pthread_mutex_t *mutex);
+void			safe_free(void **ptr);
+int				initialize_philosophers(t_params *params, t_philo_data ***philo_data,
+					pthread_t **threads);
 #endif
