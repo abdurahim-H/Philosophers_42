@@ -101,9 +101,6 @@ Where X is the philosopher number.
 - Practical experience with mutex synchronization
 - Problem-solving skills for concurrent programming challenges
 
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check [issues page](https://github.com/yourusername/philosophers/issues).
 
 ## 📝 License
 
