@@ -1,4 +1,4 @@
-# 🍽️ Philosophers
+<h1 align="center">🍽️ Philosophers</h1>
 
 <p align="center">
   <img src="https://i.imgur.com/8kRWYr2.png" alt="Philosophers Banner">
